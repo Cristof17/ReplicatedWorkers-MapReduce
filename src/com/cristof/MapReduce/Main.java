@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.cristof.MapReduce.Map.MapWorker;
 import com.cristof.MapReduce.Map.PartialText;
 
 public class Main {
@@ -13,7 +14,6 @@ public class Main {
 	static String inputFilePath;
 	static String outputFilePath;
 	
-	static int numThreads;
 	
 	public static void main(String[] args){
 	
@@ -43,9 +43,11 @@ public class Main {
 			Document firstDocument = new Document(sc.next());
 			ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize);
 			
+			MapWorker worker = new MapWorker(new WorkPool(4));
 			for(PartialText fragment : fragments){
-				System.out.println(fragment.start + " " + fragment.stop);
+				worker.processPartialText(fragment);
 			}
+			
 			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
