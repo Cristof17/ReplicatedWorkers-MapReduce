@@ -49,21 +49,25 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				else
 					raf.seek(ps.start);
 				
-				raf.seek(ps.start - 1); //check the previous value
-				caracter = raf.readByte();
-				//if half of the word, delete it
-				if(delimitators.contains(new Character((char)caracter).toString())){
-					raf.seek(ps.start);
+				/*
+				 * BEGINING
+				 */
+				if(ps.start >0){
+					raf.seek(ps.start - 1); //check the previous value
 					caracter = raf.readByte();
-				}
-				else{ //it's not ok (middle of the word)
-					while(!delimitators.contains(new Character((char)caracter).toString())){
-						caracter = raf.readByte(); //read blindly until the first delimitator is met
-						debugChar = (char)caracter;
-						charRead ++;
+					//if half of the word, delete it
+					if(delimitators.contains(new Character((char)caracter).toString())){
+						raf.seek(ps.start);
+						caracter = raf.readByte();
+					}
+					else{ //it's not ok (middle of the word)
+						while(!delimitators.contains(new Character((char)caracter).toString())){
+							caracter = raf.readByte(); //read blindly until the first delimitator is met
+							debugChar = (char)caracter;
+							charRead ++;
+						}
 					}
 				}
-				
 				//read the fragment
 				while(charRead <= numberOfChars){
 					

@@ -63,10 +63,10 @@ public class Main  {
 			
 			//create workers and assign fragments to each one
 			MapWorker worker = new MapWorker(new WorkPool(numberOfThreads),mapResultCallback);
-//			for(int i = 0 ; i < fragments.size() ; i++){
-//				PartialText fragment = fragments.get(i);
-				worker.processPartialText(fragments.get(2));				
-//			}
+			for(int i = 0 ; i < fragments.size() ; i++){
+				PartialText fragment = fragments.get(i);
+				worker.processPartialText(fragment);				
+			}
 			
 //			}
 			
