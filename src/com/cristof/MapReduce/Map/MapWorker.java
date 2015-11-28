@@ -6,6 +6,8 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.print.attribute.standard.Chromaticity;
+
 import com.cristof.MapReduce.WorkPool;
 
 public class MapWorker extends Thread implements ProcessWordInterface{
@@ -34,6 +36,9 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 			
 			int numberOfChars =(int) (ps.stop - ps.start + 1); 
 			byte[] destination_buffer =  new byte[10000 ];
+			byte caracter;
+			char debugChar;
+			
 			try {
 				RandomAccessFile raf = new  RandomAccessFile(new File(ps.fileName),"r");
 				int charRead = 0;
@@ -42,58 +47,41 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				if(ps.start == 0)
 					raf.seek(ps.start);
 				else
-					raf.seek(ps.start-1);
+					raf.seek(ps.start);
+				
+				raf.seek(ps.start - 1); //check the previous value
+				caracter = raf.readByte();
+				//if half of the word, delete it
+				if(delimitators.contains(new Character((char)caracter).toString())){
+					raf.seek(ps.start);
+					caracter = raf.readByte();
+				}
+				else{ //it's not ok (middle of the word)
+					while(!delimitators.contains(new Character((char)caracter).toString())){
+						caracter = raf.readByte(); //read blindly until the first delimitator is met
+						debugChar = (char)caracter;
+					}
+				}
+				
 				//read the fragment
 				while(charRead <= numberOfChars){
+					
 					//read a word
 					while(true){
-						byte caracter = raf.readByte();
-						char caraterDebug = (char)caracter;
-						//check special situations
-						/*
-						 * BEGINING
-						 */
-						//check the current character
-						if(ps.start > 0 &&
-							! delimitators.contains(new Character((char)caracter).toString())){
-							//landed in the middle of a word
-							//get the rest of partial word
-							while(! delimitators.contains(new Character((char)caracter).toString())){
-								caracter = raf.readByte();
-								caraterDebug = (char)caracter;
-								charRead++;
-							}
-							//go to the next word
-							break;
-						}
-						//check the previous character
-						long previousFilePointer = raf.getFilePointer();
-						//if is not the beginning of the word
-						if(ps.start > 0)
-							raf.seek(raf.getFilePointer() - 1);//one char behind
-						//check the previous caracter 
-						if(ps.start > 0 &&
-								! delimitators.contains(new Character((char)caracter).toString())){
-								//landed in the middle of a word
-								
-								//get the rest of partial word
-								while(! delimitators.contains(new Character((char)caracter).toString())){
-									caracter = raf.readByte();
-									charRead ++ ;
-								}
-								//go to the next word
-								break;
-							}				
+						charRead++;
+						caracter = raf.readByte();
+						debugChar = (char)caracter;
 						if(delimitators.contains(new Character((char)caracter).toString())){
 							break;
 						}else{
 							word.append((char)caracter);
-							charRead ++;
 						}
 					}
-					if(word.toString()!= ""){
+					
+									
+					if(word.toString().length() != 0)
 						System.out.println(word.toString());
-					}
+					
 					processWord(word.toString(),ps.fileName);
 					word = new StringBuilder();
 				}
