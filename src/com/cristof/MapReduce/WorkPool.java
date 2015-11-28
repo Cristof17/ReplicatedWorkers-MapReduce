@@ -16,23 +16,12 @@ public class WorkPool {
 	
 	LinkedList<PartialText> tasks = new LinkedList<PartialText>();
 
-
-	int occurences = 0 ;
 	/**
 	 * Constructor pentru clasa WorkPool.
 	 * @param nThreads - numarul de thread-uri worker
 	 */
 	public WorkPool(int nThreads) {
 		this.nThreads = nThreads;
-		this.occurences = 0 ;
-	}
-
-	public synchronized void incrementOccurencesWith(int toAdd){
-		this.occurences += toAdd ;
-	}
-
-	public synchronized int getOccurences(){
-		return this.occurences;
 	}
 
 	/**
@@ -84,8 +73,6 @@ public class WorkPool {
 		this.notify();
 
 	}
-
-
 }
 
 

@@ -5,14 +5,18 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.cristof.MapReduce.Map.MapResultFinishedCallback;
 import com.cristof.MapReduce.Map.MapWorker;
+import com.cristof.MapReduce.Map.MapWorker.MapResult;
 import com.cristof.MapReduce.Map.PartialText;
 
-public class Main {
+public class Main  {
 
 	static int numberOfThreads ;
 	static String inputFilePath;
 	static String outputFilePath;
+	static ArrayList<MapResult> results;
+	static MapResultFinishedCallback mapResultCallback;
 	
 	
 	public static void main(String[] args){
@@ -25,6 +29,7 @@ public class Main {
 		numberOfThreads = Integer.parseInt(args[0]);
 		inputFilePath = args[1];
 		outputFilePath = args[2];
+		results = new ArrayList<MapWorker.MapResult>();
 		
 		/*
 		 * Read from file the fragmentSize and number of Files + filenames and sizes
@@ -40,24 +45,37 @@ public class Main {
 			int numberOfDocuments = sc.nextInt();
 			System.out.println("Number of documents is "+ numberOfDocuments);
 			
+			
+			//this object is responsible with adding the 
+			//result from MapWorker to the list of Results
+			mapResultCallback = new MapResultFinishedCallback() {
+				
+				@Override
+				public void mapResultReady(MapResult result) {
+					results.add(result);
+				}
+			};
+			//open the document
 			Document firstDocument = new Document(sc.next());
+			
+			//split into fragments
 			ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize);
 			
-			MapWorker worker = new MapWorker(new WorkPool(4));
-			for(PartialText fragment : fragments){
-				worker.processPartialText(fragment);
+			//create workers and assign fragments to each one
+			MapWorker worker = new MapWorker(new WorkPool(numberOfThreads),mapResultCallback);
+			for(int i = 0 ; i < fragments.size() ; i++){
+				PartialText fragment = fragments.get(i);
+				worker.processPartialText(fragment);				
 			}
 			
+//			}
 			
+							
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-				
-		WorkPool workPool  = new WorkPool(4);
-
-	}
-	
+	}	
 	
 	private static class Document{
 		
@@ -102,7 +120,7 @@ public class Main {
 		}
 		
 	}
-	
+
 
 	
 }
