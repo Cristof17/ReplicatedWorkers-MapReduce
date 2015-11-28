@@ -60,6 +60,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					while(!delimitators.contains(new Character((char)caracter).toString())){
 						caracter = raf.readByte(); //read blindly until the first delimitator is met
 						debugChar = (char)caracter;
+						charRead ++;
 					}
 				}
 				
