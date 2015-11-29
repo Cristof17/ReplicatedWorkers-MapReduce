@@ -3,20 +3,28 @@ package com.cristof.MapReduce;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
+
+import javax.sql.PooledConnection;
 
 import com.cristof.MapReduce.Map.MapResultFinishedCallback;
 import com.cristof.MapReduce.Map.MapWorker;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
 import com.cristof.MapReduce.Map.PartialText;
+import com.cristof.MapReduce.Reduce.ReduceWorker;
 
 public class Main  {
 
 	static int numberOfThreads ;
 	static String inputFilePath;
 	static String outputFilePath;
-	static ArrayList<MapResult> results;
 	static MapResultFinishedCallback mapResultCallback;
+	static MapWorker[] mapWorkers;
+	static ReduceWorker[] reduceWorkers;
+	static WorkPool mapPool;
+	static HashMap<Integer, List<MapResult>> mapResults;
 	
 	
 	public static void main(String[] args){
@@ -29,7 +37,10 @@ public class Main  {
 		numberOfThreads = Integer.parseInt(args[0]);
 		inputFilePath = args[1];
 		outputFilePath = args[2];
-		results = new ArrayList<MapWorker.MapResult>();
+		mapWorkers = new MapWorker[numberOfThreads];
+		reduceWorkers = new ReduceWorker[numberOfThreads];
+		mapPool = new WorkPool(numberOfThreads); 
+		mapResults = new HashMap<Integer, List<MapResult>>();
 		
 		/*
 		 * Read from file the fragmentSize and number of Files + filenames and sizes
@@ -51,26 +62,47 @@ public class Main  {
 			mapResultCallback = new MapResultFinishedCallback() {
 				
 				@Override
-				public void mapResultReady(MapResult result) {
-					results.add(result);
+				public void mapResultReady(MapResult result , int ID) {
+					//TODO 
+					//Put in a hasTable the results
+						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(ID);
+						if(resultsForID == null){
+							ArrayList<MapResult> value = new ArrayList<MapWorker.MapResult>();
+							value.add(result);
+							mapResults.put(ID, value);
+						}else{
+							resultsForID.add(result);
+							mapResults.put(ID, resultsForID);
+						}
+					//check if there is any work for the ID worker
+					//if there is none, than we are finished and we shall wait for the others to finish
+					//mapWorkers[ID].processPartialText(mapPool.getWork());
 				}
 			};
-			//open the document
-			Document firstDocument = new Document(sc.next());
 			
-			//split into fragments
-			ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize);
 			
-			//create workers and assign fragments to each one
-			MapWorker worker = new MapWorker(new WorkPool(numberOfThreads),mapResultCallback);
-			for(int i = 0 ; i < fragments.size() ; i++){
-				PartialText fragment = fragments.get(i);
-				worker.processPartialText(fragment);				
+			//create the mapWorkers
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				mapWorkers[i] = new MapWorker(mapPool, mapResultCallback, i);
 			}
 			
-//			}
+			//open the documents and split the work
+			while(sc.hasNext()){
+				Document firstDocument = new Document(sc.next());
+				
+				//split into fragments
+				ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize);
+				MapWorker workerTest = new MapWorker(mapPool,mapResultCallback,0);
+				for(int i = 0 ; i < fragments.size() ; i++){
+					PartialText fragment = fragments.get(i);
+					mapPool.putWork(fragment);				
+					workerTest.processPartialText(fragment);
+				}
+				
+			}
 			
-							
+			//while(!mapPool.ready){}; // wait for workers to finish work
+										
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

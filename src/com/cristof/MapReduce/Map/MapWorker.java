@@ -16,15 +16,17 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 	public int maxSize;
 	public MapResult result;
 	public MapResultFinishedCallback callback;
+	public int ID;
 
 
 	public static String delimitators = new String(";: /?~\\.,><~`[]{}()!@#$%^&-_+'=*\"\t\r\n");
 	
 	public MapWorker(WorkPool workpool,
-			MapResultFinishedCallback callback) {
+			MapResultFinishedCallback callback, int ID) {
 		this.wp = workpool;
 		this.maxSize = 20 ;
 		this.callback = callback;
+		this.ID = ID;
 	}
 
 	/**
@@ -91,7 +93,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					word = new StringBuilder();
 				}
 			} catch (IOException e){}
-			callback.mapResultReady(result);
+			callback.mapResultReady(result, this.ID);
 		 }
 
 	public void run() {
