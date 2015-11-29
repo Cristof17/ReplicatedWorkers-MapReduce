@@ -4,6 +4,6 @@ import com.cristof.MapReduce.Map.MapWorker.MapResult;
 
 public interface MapResultFinishedCallback {
 
-	public void mapResultReady(MapResult result, int ID);
+	public void mapResultReady(MapResult result, int workerID , int fragmentID);
 	
 }

@@ -17,6 +17,7 @@ import com.cristof.MapReduce.Reduce.ReduceWorker;
 
 public class Main  {
 
+	static int documentID;
 	static int numberOfThreads ;
 	static String inputFilePath;
 	static String outputFilePath;
@@ -62,17 +63,17 @@ public class Main  {
 			mapResultCallback = new MapResultFinishedCallback() {
 				
 				@Override
-				public void mapResultReady(MapResult result , int ID) {
+				public void mapResultReady(MapResult result , int workerID , int fragmentID) {
 					//TODO 
 					//Put in a hasTable the results
-						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(ID);
+						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
 						if(resultsForID == null){
 							ArrayList<MapResult> value = new ArrayList<MapWorker.MapResult>();
 							value.add(result);
-							mapResults.put(ID, value);
+							mapResults.put(fragmentID, value);
 						}else{
 							resultsForID.add(result);
-							mapResults.put(ID, resultsForID);
+							mapResults.put(documentID, resultsForID);
 						}
 					//check if there is any work for the ID worker
 					//if there is none, than we are finished and we shall wait for the others to finish
@@ -83,6 +84,7 @@ public class Main  {
 			
 			//create the mapWorkers
 			for(int i = 0 ; i < numberOfThreads ; i++){
+				//documentID for each Worker is 0
 				mapWorkers[i] = new MapWorker(mapPool, mapResultCallback, i);
 			}
 			
@@ -91,7 +93,7 @@ public class Main  {
 				Document firstDocument = new Document(sc.next());
 				
 				//split into fragments
-				ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize);
+				ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize,documentID);
 				MapWorker workerTest = new MapWorker(mapPool,mapResultCallback,0);
 				for(int i = 0 ; i < fragments.size() ; i++){
 					PartialText fragment = fragments.get(i);
@@ -99,11 +101,27 @@ public class Main  {
 					workerTest.processPartialText(fragment);
 				}
 				
+				documentID++; //process the next document
+				
 			}
 			
 			//while(!mapPool.ready){}; // wait for workers to finish work
+			
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				mapWorkers[i].join();
+			}
+			
+			//put Reduce tasks into reduceWorkPool
+			
+			//assign Reduce Tasks to ReduceWorkers
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				
+			}
 										
 		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -119,7 +137,7 @@ public class Main  {
 			fragmentSize = 0;
 		}
 		
-		public ArrayList<PartialText> splitFile(int fragmentSize){ 
+		public ArrayList<PartialText> splitFile(int fragmentSize , int IDtoHave){ 
 			
 			/*
 			 * DELETE THIS WHEN COMPLETED DEBUGGING
@@ -138,12 +156,12 @@ public class Main  {
 			long lastPosition = 0 ;
 			
 			for(int i = 0 ; i < numberOfFragments ; i++){
-				PartialText fragment = new PartialText(name , lastPosition, lastPosition + fragmentSize - 1);
+				PartialText fragment = new PartialText(name , lastPosition, lastPosition + fragmentSize - 1 , IDtoHave);
 				lastPosition += fragmentSize;
 				fragments.add(fragment);
 			}
 			
-			PartialText lastFragment = new PartialText(name , lastPosition , fileSize - 1);
+			PartialText lastFragment = new PartialText(name , lastPosition , fileSize - 1, IDtoHave);
 			fragments.add(lastFragment);
 			
 			

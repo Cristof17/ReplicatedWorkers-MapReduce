@@ -93,7 +93,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					word = new StringBuilder();
 				}
 			} catch (IOException e){}
-			callback.mapResultReady(result, this.ID);
+			callback.mapResultReady(result, this.ID,ps.fragmentID);
 		 }
 
 	public void run() {
