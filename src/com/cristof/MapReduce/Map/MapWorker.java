@@ -72,7 +72,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				}
 				//read the fragment
 				while(charRead <= numberOfChars){
-					
+
 					//read a word
 					while(true){
 						charRead++;
@@ -113,10 +113,10 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 	
 	public static class MapResult{
 		
-		private HashMap<Integer,Integer> hash ;
-		private String filename;
-		private ArrayList<String> maxWords;
-		private int maxLength;
+		public HashMap<Integer,Integer> hash ;
+		public String filename;
+		public ArrayList<String> maxWords;
+		public int maxLength;
 		
 		public MapResult(String filename){
 			this.filename = filename;
