@@ -66,7 +66,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 						while(!delimitators.contains(new Character((char)caracter).toString())){
 							caracter = raf.readByte(); //read blindly until the first delimitator is met
 							debugChar = (char)caracter;
-							charRead ++;
+							++charRead;
 						}
 					}
 				}
@@ -75,7 +75,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 
 					//read a word
 					while(true){
-						charRead++;
+						++charRead;
 						caracter = raf.readByte();
 						debugChar = (char)caracter;
 						if(delimitators.contains(new Character((char)caracter).toString())){
@@ -86,8 +86,9 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					}
 					
 									
-					if(word.toString().length() != 0)
-						System.out.println(word.toString());
+					if(word.toString().length() != 0){
+							System.out.println(word.toString());						
+					}
 					
 					processWord(word.toString(),ps.fileName);
 					word = new StringBuilder();
@@ -111,15 +112,29 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
 	}
 	
+	@Override
+	public void processWord(String word, String filename) {
+		if(result == null)
+			result = new MapResult(filename);
+		
+		result.putWord(word);
+		result.numberOfWords = result.numberOfWords+1 ;
+		
+	}
+	
+	
+	
 	public static class MapResult{
 		
 		public HashMap<Integer,Integer> hash ;
 		public String filename;
 		public ArrayList<String> maxWords;
 		public int maxLength;
+		public int numberOfWords;
 		
 		public MapResult(String filename){
 			this.filename = filename;
+			this.numberOfWords = 0;
 		}
 		
 		//count the word to the hash and check if it is of size maxSize
@@ -136,28 +151,16 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				hash.put(word.length(), new Integer(0));
 			}
 			
-			hash.put(word.length(),previous++);
+			hash.put(word.length(), ++previous);
 			
 			
 			//reset the maxSize and the list of MaxSize words
 			if(word.length() > maxLength){
 				maxLength = word.length();
 				maxWords = new ArrayList<>();
-			}
-			
-			if(word.length() == maxLength){
+			}else if(word.length() == maxLength){
 				maxWords.add(word);
 			}
 		}
 	}
-
-	@Override
-	public void processWord(String word, String filename) {
-		if(result == null)
-			result = new MapResult(filename);
-		
-		result.putWord(word);
-		
-	}
-	
 }

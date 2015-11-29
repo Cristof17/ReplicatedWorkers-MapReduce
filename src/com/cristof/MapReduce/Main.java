@@ -64,7 +64,6 @@ public class Main  {
 				
 				@Override
 				public void mapResultReady(MapResult result , int workerID , int fragmentID) {
-					//TODO 
 					//Put in a hasTable the results
 						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
 						if(resultsForID == null){
@@ -72,6 +71,10 @@ public class Main  {
 							value.add(result);
 							mapResults.put(fragmentID, value);
 						}else{
+							if(fragmentID == 0){
+								int a = 2 ;
+								int as = 10;
+							}
 							resultsForID.add(result);
 							mapResults.put(documentID, resultsForID);
 						}
@@ -99,6 +102,7 @@ public class Main  {
 					PartialText fragment = fragments.get(i);
 					mapPool.putWork(fragment);				
 					workerTest.processPartialText(fragment);
+					workerTest = new MapWorker(mapPool,mapResultCallback,0);
 				}
 				
 				documentID++; //process the next document
@@ -111,11 +115,14 @@ public class Main  {
 				mapWorkers[i].join();
 			}
 			
+			ReduceWorker reduceTestWorker ;
 			//put Reduce tasks into reduceWorkPool
-			
-			//assign Reduce Tasks to ReduceWorkers
-			for(int i = 0 ; i < numberOfThreads ; i++){
-				
+			for(int i = 0; i < numberOfDocuments ; i++){
+				ArrayList<MapResult> oneDocResult = (ArrayList<MapResult>) mapResults.get(i);
+				reduceTestWorker = new ReduceWorker(i);
+				MapResult combineResult = reduceTestWorker.combine(oneDocResult);
+				float rank = reduceTestWorker.process(combineResult);
+				System.out.println("rank of the debug document is " + rank);
 			}
 										
 		} catch (FileNotFoundException e) {

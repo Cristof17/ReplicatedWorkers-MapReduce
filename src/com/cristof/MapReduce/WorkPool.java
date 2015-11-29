@@ -67,7 +67,7 @@ public class WorkPool {
 	 * @param sp - task-ul care trebuie introdus 
 	 */
 	synchronized void putWork(PartialText sp) {
-		System.out.println("WorkPool - adaugare task: " + sp);
+//		System.out.println("WorkPool - adaugare task: " + sp);
 		tasks.add(sp);
 		/* anuntam unul dintre workerii care asteptau */
 		this.notify();
