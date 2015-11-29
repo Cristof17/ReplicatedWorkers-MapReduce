@@ -40,7 +40,7 @@ public class ReduceWorker extends Thread{
 			Integer key = keys[i];
 			Integer value = values.get(key);
 			Integer numberOfWords = mapResult.numberOfWords;
-			rank += ( Fibonacci(key) * value )/(float)numberOfWords;
+			rank += ( Fibonacci(key + 1) * value )/(float)numberOfWords;
 		}
 		
 		return rank;
@@ -68,7 +68,6 @@ public class ReduceWorker extends Thread{
 				Integer intKey = (Integer)(keySet.toArray()[j]);
 				keys[j] = intKey;
 			}
-			int size = keys.length;
 					
 			for(Integer key : keys){
 				HashMap<Integer, Integer> hash = aux.hash;

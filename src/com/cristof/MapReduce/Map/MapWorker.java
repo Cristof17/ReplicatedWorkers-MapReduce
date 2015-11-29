@@ -87,6 +87,9 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					
 									
 					if(word.toString().length() != 0){
+						if(word.toString().length() == 13){
+							System.out.println("ELEMENT HAS 13 CHARACTERS " + word.toString());
+						}
 							System.out.println(word.toString());						
 					}
 					
@@ -158,6 +161,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 			if(word.length() > maxLength){
 				maxLength = word.length();
 				maxWords = new ArrayList<>();
+				maxWords.add(word);
 			}else if(word.length() == maxLength){
 				maxWords.add(word);
 			}

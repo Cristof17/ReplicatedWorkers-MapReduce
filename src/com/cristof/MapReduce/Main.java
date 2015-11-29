@@ -109,7 +109,7 @@ public class Main  {
 				
 			}
 			
-			//while(!mapPool.ready){}; // wait for workers to finish work
+//			while(!mapPool.ready){}; // wait for workers to finish work
 			
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				mapWorkers[i].join();
@@ -123,6 +123,7 @@ public class Main  {
 				MapResult combineResult = reduceTestWorker.combine(oneDocResult);
 				float rank = reduceTestWorker.process(combineResult);
 				System.out.println("rank of the debug document is " + rank);
+				
 			}
 										
 		} catch (FileNotFoundException e) {
