@@ -1,4 +1,4 @@
-package com.cristof.MapReduce;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import com.cristof.MapReduce.WorkPool;
 import com.cristof.MapReduce.Map.MapResultFinishedCallback;
 import com.cristof.MapReduce.Map.MapWorker;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
@@ -46,13 +47,7 @@ public class Main  {
 		}
 		
 		numberOfThreads = Integer.parseInt(args[0]);
-		
-		/*
-		 * TODO 
-		 * Delete if not for debug
-		 */
-		numberOfThreads = 2;
-		
+				
 		inputFilePath = args[1];
 		outputFilePath = args[2];
 		mapWorkers = new MapWorker[numberOfThreads];
@@ -227,9 +222,12 @@ public class Main  {
 		{
 			for(int i = 0; i < results.length ; i++){
 				ReduceResult aux = results[i];
+				String rankString = new String ("" + aux.rank);
+				int length = rankString.length();
+				rankString = rankString.substring(0, length-2) + "." + rankString.substring(length - 2, length);
 			    FileWriter fw = new FileWriter(filename,true); //the true will append the new data
 			    fw.write(aux.master.filename +";"
-			    + (float)aux.rank/100
+			    + rankString
 			    +";["
 			    +aux.master.maxLength
 			    +","
@@ -260,8 +258,8 @@ public class Main  {
 			/*
 			 * DELETE THIS WHEN COMPLETED DEBUGGING
 			 */
-			String folderPath = "/home/cristof/Downloads/Tema2APD/Test-Debug/";
-			name = folderPath + name;
+//			String folderPath = "/home/cristof/Downloads/Tema2APD/Test-Debug/";
+//			name = folderPath + name;
 			
 			File file = new File(name);
 			long fileSize = file.length();

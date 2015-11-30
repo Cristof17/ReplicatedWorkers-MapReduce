@@ -66,7 +66,7 @@ public class WorkPool {
 	 * Functie care introduce un task in workpool.
 	 * @param sp - task-ul care trebuie introdus 
 	 */
-	synchronized void putWork(PartialText sp) {
+	public synchronized void putWork(PartialText sp) {
 //		System.out.println("WorkPool - adaugare task: " + sp);
 		tasks.add(sp);
 		/* anuntam unul dintre workerii care asteptau */
