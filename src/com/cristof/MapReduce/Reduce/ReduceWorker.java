@@ -26,7 +26,7 @@ public class ReduceWorker extends Thread{
 	@Override
 	public void run() {
 		
-		System.out.println("Thread-ul reduce " + this.getName() + " a pornit...");
+//		System.out.println("Thread-ul reduce " + this.getName() + " a pornit...");
 		ReduceTask task ;
 		while (true) {
 			task = pool.getWork();

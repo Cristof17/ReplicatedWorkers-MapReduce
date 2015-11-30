@@ -36,6 +36,7 @@ public class Main  {
 	static HashMap<Integer, List<MapResult>> mapResults;
 	static HashMap<Integer,Integer> ranks;
 	static ReduceResult[] reduceResults;
+	static ArrayList<String> inputFiles;
 	
 	public static void main(String[] args){
 	
@@ -114,7 +115,9 @@ public class Main  {
 			
 			//open the documents and split the work
 			while(sc.hasNext()){
-				Document firstDocument = new Document(sc.next());
+				String fileName = sc.next();
+				inputFiles.add(fileName);
+				Document firstDocument = new Document(fileName);
 				
 				//split into fragments
 				ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize,documentID);
@@ -174,6 +177,8 @@ public class Main  {
 				System.out.println(reduceResults[i].master.filename + " " + reduceResults[i].rank);
 			}
 			
+			reduceResults = checkOrder(reduceResults, inputFiles);
+			
 			writeInFile(outputFilePath, reduceResults);
 			
 		} catch (FileNotFoundException e) {
@@ -184,6 +189,33 @@ public class Main  {
 			e.printStackTrace();
 		}
 	}	
+	
+	private static ReduceResult[] checkOrder(ReduceResult[] original , ArrayList<String> input){
+		
+		ArrayList<ReduceResult> returnList = new ArrayList<ReduceResult>(original.length);
+		boolean flag = true;
+		
+		  while ( flag ){
+		            flag= false;    //set flag to false awaiting a possible swap
+		            for(int j=0;  j < original.length -1;  j++ ){
+		            	int posA = input.indexOf(original[j].master.filename);
+		            	int posB = input.indexOf(original[j+1].master.filename);
+		                   if (original[j].rank == original[j+1].rank
+		                		   && (posB < posA)){
+		                           ReduceResult aux = original[ j ];
+		                           original[ j ] = original[ j+1 ];
+		                           original[ j+1 ] = aux;
+		                           flag = true; 
+		                  }
+		            }
+		   } 
+		
+		for(int i = 0; i < original.length ; i++){
+			returnList.add(original[i]);
+		}
+		
+		return original;
+	}
 	
 	private static void writeInFile(String filename, ReduceResult[] results){
 		if(results == null)

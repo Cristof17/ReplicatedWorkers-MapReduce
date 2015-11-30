@@ -35,7 +35,7 @@ public class MapWorker extends Thread{
 //		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
 		PartialText ps ;
 		while (true) {
-			System.out.println(this.getName()  +  " " +wp.ready + " access" );
+//			System.out.println(this.getName()  +  " " +wp.ready + " access" );
 			ps = wp.getWork();
 			if (ps == null){
 				boolean ready = wp.ready;
@@ -45,7 +45,7 @@ public class MapWorker extends Thread{
 //			System.out.println("Executing file " + ps.fileName + " from " + ps.start + " to " + ps.stop);
 			processPartialText(ps);
 //			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
-			System.out.println(this.getName()  +  " " +wp.ready + " executat" );
+//			System.out.println(this.getName()  +  " " +wp.ready + " executat" );
 			this.maxSize = 0;
 			this.result = null;
 		}
