@@ -32,7 +32,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 	
 	public void run() {
 		
-		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
+//		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
 		PartialText ps ;
 		while (true) {
 			ps = wp.getWork();
@@ -40,8 +40,10 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				boolean ready = wp.ready;
 				break;
 			}
+			
+			System.out.println("Executing file " + ps.fileName + " from " + ps.start + " to " + ps.stop);
 			processPartialText(ps);
-			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
+//			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
 			
 			this.maxSize = 0;
 			this.result = null;
@@ -74,21 +76,31 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				 * BEGINING
 				 */
 				if(ps.start >0){
-					raf.seek(ps.start - 1); //check the previous value
+					
+					//check the current character to be a delimiter
 					caracter = raf.readByte();
-					//if half of the word, delete it
-					if(delimitators.contains(new Character((char)caracter).toString())){
-						raf.seek(ps.start);
+					debugChar = (char)caracter;
+					if(delimitators.contains(new Character((char)caracter).toString())){}
+					else{
+						raf.seek(ps.start - 1); //check the previous value
 						caracter = raf.readByte();
-					}
-					else{ //it's not ok (middle of the word)
-						while(!delimitators.contains(new Character((char)caracter).toString())){
-							caracter = raf.readByte(); //read blindly until the first delimitator is met
-							debugChar = (char)caracter;
-							++charRead;
+						//if half of the word, delete it
+						if(delimitators.contains(new Character((char)caracter).toString())){
+							raf.seek(ps.start);
+							caracter = raf.readByte();
+						}else{
+							//it's not ok (middle of the word)
+							while(!delimitators.contains(new Character((char)caracter).toString())){
+								caracter = raf.readByte(); //read blindly until the first delimitator is met
+								debugChar = (char)caracter;
+								++charRead;
+							}
 						}
 					}
+					
+									
 				}
+				
 				//read the fragment
 				while(charRead <= numberOfChars){
 
@@ -106,8 +118,8 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					
 									
 					if(word.toString().length() != 0){
-//							System.out.print(word.toString());
-////							System.out.println();
+						System.out.print(word.toString());
+						System.out.println();
 					}
 					
 					processWord(word.toString(),ps.fileName); //local Method
