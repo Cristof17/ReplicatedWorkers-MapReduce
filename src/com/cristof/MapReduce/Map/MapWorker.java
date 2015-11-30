@@ -85,14 +85,11 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 						}
 					}
 					
-									
-					if(word.toString().length() != 0){
-						if(word.toString().length() == 13){
-							System.out.println("ELEMENT HAS 13 CHARACTERS " + word.toString());
-						}
-							System.out.println(word.toString());						
-					}
-					
+//									
+//					if(word.toString().length() != 0){
+//							System.out.println(word.toString());								
+//					}
+//					
 					processWord(word.toString(),ps.fileName);
 					word = new StringBuilder();
 				}
@@ -101,18 +98,16 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		 }
 
 	public void run() {
+		
 		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
 		PartialText ps ;
 		while (true) {
-
 			ps = wp.getWork();
-
 			if (ps == null)
 				break;
-			
 			processPartialText(ps);
+			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
 		}
-		System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
 	}
 	
 	@Override

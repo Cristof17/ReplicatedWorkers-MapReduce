@@ -5,26 +5,37 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.cristof.MapReduce.Map.PartialText;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
 
 public class ReduceWorker extends Thread{
 	
-	private int documentID;
+	private ReducePool pool;
 
-	
-	
-	public ReduceWorker(int documentID){
-		this.documentID = documentID;
+	public ReduceWorker(ReducePool pool){
+		this.pool = pool;
 	}
 
 	@Override
 	public void run() {
 		
+		System.out.println("Thread-ul reduce " + this.getName() + " a pornit...");
+		ReduceTask task ;
+		while (true) {
+			task = pool.getWork();
+			if (task == null)
+				break;
+			MapResult master = combine(task.mapResults);
+			float rank = process(master);
+			System.out.println("Rank from " + master.filename + " = " + rank);
+		}
 	}
 	
 	
 	public float process(MapResult mapResult){
 
+		System.out.println("Processing " + mapResult.filename + " " + mapResult.maxLength);;
+		
 		float rank = 0;
 		//find which is the last key to iteratate to 
 		Set<Integer> keySet = mapResult.hash.keySet();

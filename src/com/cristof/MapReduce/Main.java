@@ -13,6 +13,8 @@ import com.cristof.MapReduce.Map.MapResultFinishedCallback;
 import com.cristof.MapReduce.Map.MapWorker;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
 import com.cristof.MapReduce.Map.PartialText;
+import com.cristof.MapReduce.Reduce.ReducePool;
+import com.cristof.MapReduce.Reduce.ReduceTask;
 import com.cristof.MapReduce.Reduce.ReduceWorker;
 
 public class Main  {
@@ -25,6 +27,7 @@ public class Main  {
 	static MapWorker[] mapWorkers;
 	static ReduceWorker[] reduceWorkers;
 	static WorkPool mapPool;
+	static ReducePool reducePool;
 	static HashMap<Integer, List<MapResult>> mapResults;
 	
 	
@@ -36,16 +39,26 @@ public class Main  {
 		}
 		
 		numberOfThreads = Integer.parseInt(args[0]);
+		
+		/*
+		 * TODO 
+		 * Delete if not for debug
+		 */
+		numberOfThreads = 1;
+		
 		inputFilePath = args[1];
 		outputFilePath = args[2];
 		mapWorkers = new MapWorker[numberOfThreads];
 		reduceWorkers = new ReduceWorker[numberOfThreads];
 		mapPool = new WorkPool(numberOfThreads); 
+		reducePool = new ReducePool(numberOfThreads);
 		mapResults = new HashMap<Integer, List<MapResult>>();
 		
 		/*
 		 * Read from file the fragmentSize and number of Files + filenames and sizes
 		 */
+		
+		
 		
 		File inFile = new File(inputFilePath);
 		try {
@@ -65,19 +78,18 @@ public class Main  {
 				@Override
 				public void mapResultReady(MapResult result , int workerID , int fragmentID) {
 					//Put in a hasTable the results
+					synchronized (mapResults) {
+						
 						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
 						if(resultsForID == null){
 							ArrayList<MapResult> value = new ArrayList<MapWorker.MapResult>();
 							value.add(result);
 							mapResults.put(fragmentID, value);
 						}else{
-							if(fragmentID == 0){
-								int a = 2 ;
-								int as = 10;
-							}
 							resultsForID.add(result);
 							mapResults.put(documentID, resultsForID);
 						}
+					}
 					//check if there is any work for the ID worker
 					//if there is none, than we are finished and we shall wait for the others to finish
 					//mapWorkers[ID].processPartialText(mapPool.getWork());
@@ -97,34 +109,45 @@ public class Main  {
 				
 				//split into fragments
 				ArrayList<PartialText> fragments = firstDocument.splitFile(fragmentSize,documentID);
-				MapWorker workerTest = new MapWorker(mapPool,mapResultCallback,0);
 				for(int i = 0 ; i < fragments.size() ; i++){
 					PartialText fragment = fragments.get(i);
 					mapPool.putWork(fragment);				
-					workerTest.processPartialText(fragment);
-					workerTest = new MapWorker(mapPool,mapResultCallback,0);
 				}
 				
 				documentID++; //process the next document
 				
 			}
 			
-//			while(!mapPool.ready){}; // wait for workers to finish work
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				mapWorkers[i].start();
+			}
+			
+			while(!mapPool.ready){} // wait for workers to finish work
 			
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				mapWorkers[i].join();
 			}
 			
-			ReduceWorker reduceTestWorker ;
-			//put Reduce tasks into reduceWorkPool
-			for(int i = 0; i < numberOfDocuments ; i++){
-				ArrayList<MapResult> oneDocResult = (ArrayList<MapResult>) mapResults.get(i);
-				reduceTestWorker = new ReduceWorker(i);
-				MapResult combineResult = reduceTestWorker.combine(oneDocResult);
-				float rank = reduceTestWorker.process(combineResult);
-				System.out.println("rank of the debug document is " + rank);
-				
+			for(int i = 0 ; i < numberOfDocuments ; i++){
+				ArrayList<MapResult> results =(ArrayList<MapResult>) mapResults.get(i);
+				ReduceTask newTask = new ReduceTask(results);
+				reducePool.putWork(newTask);
 			}
+			
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				reduceWorkers[i] = new ReduceWorker(reducePool);
+			}
+			
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				reduceWorkers[i].run();
+			}
+			
+			while(!reducePool.ready){}
+			
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				reduceWorkers[i].join();
+			}
+			
 										
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
