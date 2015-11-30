@@ -34,7 +34,7 @@ public class ReduceWorker extends Thread{
 	
 	public float process(MapResult mapResult){
 
-		System.out.println("Processing " + mapResult.filename + " " + mapResult.maxLength);;
+//		System.out.println("Processing " + mapResult.filename + " " + mapResult.maxLength);;
 		
 		float rank = 0;
 		//find which is the last key to iteratate to 
@@ -51,6 +51,9 @@ public class ReduceWorker extends Thread{
 			Integer key = keys[i];
 			Integer value = values.get(key);
 			Integer numberOfWords = mapResult.numberOfWords;
+			//because my programs takes into account words of size 0
+			//I need to substract them (values.get(0)
+			numberOfWords -= values.get(0);
 			rank += ( Fibonacci(key + 1) * value )/(float)numberOfWords;
 		}
 		
@@ -100,11 +103,22 @@ public class ReduceWorker extends Thread{
 		//Combine Lists
 		int maxSize = 0;
 		int[] whichMapResult = new int[maps.size()]; //position/positions in the MapResults Array that has/have the maxSize
+		for(int i = 0 ; i < whichMapResult.length ; i++){
+			whichMapResult[i] = -1 ;
+			//if the initial value is 0, when combining lists down below,
+			//0 will be counted as a position in the HashMap
+		}
 		int currPos = 0;
 		for(int i = 0 ; i < maps.size() ; i++){
 			MapResult aux = maps.get(i);
 			if(aux.maxLength >= maxSize ){
 				maxSize = aux.maxLength;
+			}
+		}
+		
+		for(int i = 0 ; i < maps.size() ; i++){
+			MapResult aux = maps.get(i);
+			if(aux.maxLength == maxSize){
 				whichMapResult[currPos] = i;
 				++currPos;
 			}
@@ -118,10 +132,16 @@ public class ReduceWorker extends Thread{
 		//we will replace the list of max words from the master
 		ArrayList<String> globalMaxWords = new ArrayList<>();
 		for(int i = 0 ; i < whichMapResult.length ; i++){
-			MapResult aux = maps.get(whichMapResult[i]);
-			ArrayList<String> auxMaxWords = aux.maxWords;
-			for(String word : auxMaxWords){
-				globalMaxWords.add(word);
+			/*
+			 * from initialization of whichResult the initial 
+			 * values are -1. 
+			 */
+			if(whichMapResult[i] >= 0){
+				MapResult aux = maps.get(whichMapResult[i]);
+				ArrayList<String> auxMaxWords = aux.maxWords;
+				for(String word : auxMaxWords){
+					globalMaxWords.add(word);
+				}
 			}
 		}
 		

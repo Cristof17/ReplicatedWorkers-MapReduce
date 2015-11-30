@@ -106,12 +106,8 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					
 									
 					if(word.toString().length() != 0){
-						//TODO
-						//Remove if not for debug
-
-						
-							System.out.print(word.toString());
-//							System.out.println();
+//							System.out.print(word.toString());
+////							System.out.println();
 					}
 					
 					processWord(word.toString(),ps.fileName); //local Method
@@ -149,15 +145,6 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		//count the word to the hash and check if it is of size maxSize
 		public synchronized void putWord(String word){
 			
-			//TODO
-			//Remove if not for debug
-			
-			if(word.toString() == "unqualified"){
-				int a = 2;
-				int v = 23;
-				System.out.println("Reached unqualified word");
-			}
-			
 			if(hash == null && maxWords == null){
 				hash = new HashMap<Integer,Integer>();
 				maxWords = new ArrayList<String>();
@@ -174,14 +161,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 			
 			//reset the maxSize and the list of MaxSize words
 			if(word.length() > maxLength){
-				if(word.toString().equals("characteristics")){
 				
-				//TODO
-				//Remove if not for debug
-					int a = 2;
-					int b = 20;
-					System.out.println("Word is characteristics");
-				}	
 				maxLength = word.length();
 				maxWords = new ArrayList<>();
 				maxWords.add(word);
@@ -189,7 +169,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				maxWords.add(word);
 			}
 			
-			System.out.println("Word size for " + word.toString() + " is " + word.toString().length());
+//			System.out.println("Word size for " + word.toString() + " is " + word.toString().length());
 		}
 	}
 }
