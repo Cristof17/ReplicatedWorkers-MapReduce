@@ -63,7 +63,7 @@ public class ReduceWorker extends Thread{
 	}
 	
 	public MapResult combine(ArrayList<MapResult> maps){
-		//we bring all of them to the first MapResult
+		//we bring al0l of them to the first MapResult
 		//which will be the master
 		MapResult master = maps.get(0);
 		

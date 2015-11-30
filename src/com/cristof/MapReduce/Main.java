@@ -30,7 +30,6 @@ public class Main  {
 	static ReducePool reducePool;
 	static HashMap<Integer, List<MapResult>> mapResults;
 	
-	
 	public static void main(String[] args){
 	
 		if(args.length < 3){
@@ -50,8 +49,6 @@ public class Main  {
 		outputFilePath = args[2];
 		mapWorkers = new MapWorker[numberOfThreads];
 		reduceWorkers = new ReduceWorker[numberOfThreads];
-		mapPool = new WorkPool(numberOfThreads); 
-		reducePool = new ReducePool(numberOfThreads);
 		mapResults = new HashMap<Integer, List<MapResult>>();
 		
 		/*
@@ -67,7 +64,7 @@ public class Main  {
 			int fragmentSize = sc.nextInt();
 			System.out.println("Fragment size is " + fragmentSize);
 			
-			int numberOfDocuments = sc.nextInt();
+			final int numberOfDocuments = sc.nextInt();
 			System.out.println("Number of documents is "+ numberOfDocuments);
 			
 			
@@ -87,15 +84,18 @@ public class Main  {
 							mapResults.put(fragmentID, value);
 						}else{
 							resultsForID.add(result);
-							mapResults.put(documentID, resultsForID);
+							mapResults.put(fragmentID, resultsForID);
 						}
 					}
-					//check if there is any work for the ID worker
-					//if there is none, than we are finished and we shall wait for the others to finish
-					//mapWorkers[ID].processPartialText(mapPool.getWork());
 				}
 			};
 			
+
+			/*
+			 * I instantiate here because the mapPoolCallback will be null if I put it above
+			 */
+			mapPool = new WorkPool(numberOfThreads); 
+			reducePool = new ReducePool(numberOfThreads);
 			
 			//create the mapWorkers
 			for(int i = 0 ; i < numberOfThreads ; i++){
@@ -121,12 +121,8 @@ public class Main  {
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				mapWorkers[i].start();
 			}
-			
-			while(!mapPool.ready){} // wait for workers to finish work
-			
-			for(int i = 0 ; i < numberOfThreads ; i++){
-				mapWorkers[i].join();
-			}
+				
+			while(!mapPool.ready);
 			
 			for(int i = 0 ; i < numberOfDocuments ; i++){
 				ArrayList<MapResult> results =(ArrayList<MapResult>) mapResults.get(i);
@@ -139,16 +135,13 @@ public class Main  {
 			}
 			
 			for(int i = 0 ; i < numberOfThreads ; i++){
-				reduceWorkers[i].run();
+				reduceWorkers[i].start();
 			}
-			
-			while(!reducePool.ready){}
 			
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				reduceWorkers[i].join();
 			}
 			
-										
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

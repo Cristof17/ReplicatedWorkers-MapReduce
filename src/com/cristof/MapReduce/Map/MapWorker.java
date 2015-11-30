@@ -24,9 +24,28 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 	public MapWorker(WorkPool workpool,
 			MapResultFinishedCallback callback, int ID) {
 		this.wp = workpool;
-		this.maxSize = 20 ;
+		this.maxSize = 0 ;
 		this.callback = callback;
-		this.ID = ID;
+		this.ID = ID; // worker ID 
+	}
+	
+	
+	public void run() {
+		
+		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
+		PartialText ps ;
+		while (true) {
+			ps = wp.getWork();
+			if (ps == null){
+				boolean ready = wp.ready;
+				break;
+			}
+			processPartialText(ps);
+			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
+			
+			this.maxSize = 0;
+			this.result = null;
+		}
 	}
 
 	/**
@@ -34,7 +53,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 	 * noi solutii partiale care se adauga in workpool folosind putWork().
 	 * 	Daca s-a ajuns la o solutie finala, aceasta va fi afisata.
 	 */
-	public void processPartialText(PartialText ps) {
+	public synchronized void processPartialText(PartialText ps) {
 			
 			int numberOfChars =(int) (ps.stop - ps.start + 1); 
 			byte[] destination_buffer =  new byte[10000 ];
@@ -85,37 +104,29 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 						}
 					}
 					
-//									
-//					if(word.toString().length() != 0){
-//							System.out.println(word.toString());								
-//					}
-//					
-					processWord(word.toString(),ps.fileName);
+									
+					if(word.toString().length() != 0){
+						//TODO
+						//Remove if not for debug
+
+						
+							System.out.print(word.toString());
+//							System.out.println();
+					}
+					
+					processWord(word.toString(),ps.fileName); //local Method
 					word = new StringBuilder();
 				}
 			} catch (IOException e){}
-			callback.mapResultReady(result, this.ID,ps.fragmentID);
+			callback.mapResultReady(result, this.ID, ps.fragmentID);
 		 }
-
-	public void run() {
-		
-		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
-		PartialText ps ;
-		while (true) {
-			ps = wp.getWork();
-			if (ps == null)
-				break;
-			processPartialText(ps);
-			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
-		}
-	}
 	
 	@Override
-	public void processWord(String word, String filename) {
+	public synchronized void processWord(String word, String filename) {
 		if(result == null)
 			result = new MapResult(filename);
 		
-		result.putWord(word);
+		result.putWord(word); //local Method
 		result.numberOfWords = result.numberOfWords+1 ;
 		
 	}
@@ -136,7 +147,16 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		}
 		
 		//count the word to the hash and check if it is of size maxSize
-		public void putWord(String word){
+		public synchronized void putWord(String word){
+			
+			//TODO
+			//Remove if not for debug
+			
+			if(word.toString() == "unqualified"){
+				int a = 2;
+				int v = 23;
+				System.out.println("Reached unqualified word");
+			}
 			
 			if(hash == null && maxWords == null){
 				hash = new HashMap<Integer,Integer>();
@@ -154,12 +174,22 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 			
 			//reset the maxSize and the list of MaxSize words
 			if(word.length() > maxLength){
+				if(word.toString().equals("characteristics")){
+				
+				//TODO
+				//Remove if not for debug
+					int a = 2;
+					int b = 20;
+					System.out.println("Word is characteristics");
+				}	
 				maxLength = word.length();
 				maxWords = new ArrayList<>();
 				maxWords.add(word);
 			}else if(word.length() == maxLength){
 				maxWords.add(word);
 			}
+			
+			System.out.println("Word size for " + word.toString() + " is " + word.toString().length());
 		}
 	}
 }
