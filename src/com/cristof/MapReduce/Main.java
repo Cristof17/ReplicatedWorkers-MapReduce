@@ -2,9 +2,12 @@ package com.cristof.MapReduce;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.RandomAccess;
 import java.util.Scanner;
 
 import javax.sql.PooledConnection;
@@ -150,6 +153,8 @@ public class Main  {
 			e.printStackTrace();
 		}
 	}	
+	
+	
 		
 	private static class Document{
 		

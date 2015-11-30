@@ -72,6 +72,13 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				else
 					raf.seek(ps.start);
 				
+				System.out.println("FILE = " + ps.fileName);
+				
+				//TODO
+				if(ps.fileName.equals("/home/cristof/Downloads/Tema2APD/Test-Debug/doc3.txt")){
+					printRaf(raf, ps.start, ps.stop);
+				}
+				
 				/*
 				 * BEGINING
 				 */
@@ -87,7 +94,7 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 						//if half of the word, delete it
 						if(delimitators.contains(new Character((char)caracter).toString())){
 							raf.seek(ps.start);
-							caracter = raf.readByte();
+//							caracter = raf.readByte();
 						}else{
 							//it's not ok (middle of the word)
 							while(!delimitators.contains(new Character((char)caracter).toString())){
@@ -110,6 +117,19 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 						caracter = raf.readByte();
 						debugChar = (char)caracter;
 						if(delimitators.contains(new Character((char)caracter).toString())){
+							/*
+							 * If the charRead == numberOfChars after processing this word
+							 * and the last character read is a delimiter 
+							 * than the next word, FROM THE NEXT FRAGMENT
+							 * will be read.
+							 * 
+							 * When going to the next fragment, then the last word
+							 * from the previous fragment will be read the second time
+							 * because my algorithm checks to see if the previous character
+							 * is a delimiter
+							 */
+							if(charRead == numberOfChars)
+								++charRead;
 							break;
 						}else{
 							word.append((char)caracter);
@@ -139,7 +159,24 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		
 	}
 	
-	
+		//TODO
+		public void printRaf(RandomAccessFile raf , long start , long stop){
+
+			try {
+				long prevPos = raf.getFilePointer();
+				raf.seek(start);
+				while(raf.getFilePointer() <= stop){
+					System.out.print((char)raf.readByte());
+				}
+				
+				
+				raf.seek(prevPos);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
 	
 	public static class MapResult{
 		
