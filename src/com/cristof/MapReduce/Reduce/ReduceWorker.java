@@ -1,19 +1,26 @@
 package com.cristof.MapReduce.Reduce;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.cristof.MapReduce.Map.PartialText;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
 
 public class ReduceWorker extends Thread{
 	
 	private ReducePool pool;
-
-	public ReduceWorker(ReducePool pool){
+	private HashMap<Integer,Integer> hash;
+	private String outputFilePath;
+	private ReduceResultFinishedCallback callback;
+	
+	public ReduceWorker(ReducePool pool, String outputFilePath,ReduceResultFinishedCallback callback){
 		this.pool = pool;
+		this.hash = hash;
+		this.outputFilePath = outputFilePath;
+		this.callback = callback;
 	}
 
 	@Override
@@ -27,7 +34,11 @@ public class ReduceWorker extends Thread{
 				break;
 			MapResult master = combine(task.mapResults);
 			float rank = process(master);
-			System.out.println("Rank from " + master.filename + " = " + rank);
+//			System.out.println("Rank from " + master.filename + " = " + rank);
+			//to get the last two digits after the coma from rank, I
+			//multiply it by 100
+			ReduceResult result = new ReduceResult(master,(int) ( rank * 100));
+			callback.reduceResultReady(result);
 		}
 	}
 	
@@ -47,7 +58,7 @@ public class ReduceWorker extends Thread{
 		}
 		//get the hass for the MapResult from the combine phase
 		HashMap <Integer, Integer> values = mapResult.hash;
-		for (int i = 0 ; i < keys.length ; i++){
+		for (int i = 1 ; i < keys.length ; i++){
 			Integer key = keys[i];
 			Integer value = values.get(key);
 			Integer numberOfWords = mapResult.numberOfWords;
@@ -166,6 +177,5 @@ public class ReduceWorker extends Thread{
 		
 		return master; 
 	}
-	
 	
 }

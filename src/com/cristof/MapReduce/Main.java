@@ -2,21 +2,22 @@ package com.cristof.MapReduce;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.RandomAccess;
 import java.util.Scanner;
-
-import javax.sql.PooledConnection;
 
 import com.cristof.MapReduce.Map.MapResultFinishedCallback;
 import com.cristof.MapReduce.Map.MapWorker;
 import com.cristof.MapReduce.Map.MapWorker.MapResult;
 import com.cristof.MapReduce.Map.PartialText;
 import com.cristof.MapReduce.Reduce.ReducePool;
+import com.cristof.MapReduce.Reduce.ReduceResult;
+import com.cristof.MapReduce.Reduce.ReduceResultFinishedCallback;
 import com.cristof.MapReduce.Reduce.ReduceTask;
 import com.cristof.MapReduce.Reduce.ReduceWorker;
 
@@ -27,11 +28,14 @@ public class Main  {
 	static String inputFilePath;
 	static String outputFilePath;
 	static MapResultFinishedCallback mapResultCallback;
+	static ReduceResultFinishedCallback reduceResultCallback;
 	static MapWorker[] mapWorkers;
 	static ReduceWorker[] reduceWorkers;
 	static WorkPool mapPool;
 	static ReducePool reducePool;
 	static HashMap<Integer, List<MapResult>> mapResults;
+	static HashMap<Integer,Integer> ranks;
+	static ReduceResult[] reduceResults;
 	
 	public static void main(String[] args){
 	
@@ -46,13 +50,15 @@ public class Main  {
 		 * TODO 
 		 * Delete if not for debug
 		 */
-		numberOfThreads = 1;
+		numberOfThreads = 2;
 		
 		inputFilePath = args[1];
 		outputFilePath = args[2];
 		mapWorkers = new MapWorker[numberOfThreads];
 		reduceWorkers = new ReduceWorker[numberOfThreads];
 		mapResults = new HashMap<Integer, List<MapResult>>();
+		ranks = new HashMap<Integer,Integer>();
+		
 		
 		/*
 		 * Read from file the fragmentSize and number of Files + filenames and sizes
@@ -124,8 +130,11 @@ public class Main  {
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				mapWorkers[i].start();
 			}
-				
-			while(!mapPool.ready);
+
+			
+			for(int i = 0 ; i < numberOfThreads ; i++){
+				mapWorkers[i].join();
+			}
 			
 			for(int i = 0 ; i < numberOfDocuments ; i++){
 				ArrayList<MapResult> results =(ArrayList<MapResult>) mapResults.get(i);
@@ -133,8 +142,21 @@ public class Main  {
 				reducePool.putWork(newTask);
 			}
 			
+			reduceResults = new ReduceResult[numberOfDocuments];
+			synchronized (reduceResults) {
+				reduceResultCallback = new ReduceResultFinishedCallback() {
+					
+					@Override
+					public void reduceResultReady(ReduceResult result) {
+						int position = result.master.fragmentID;
+						reduceResults[position] = result;
+					}
+				};				
+			}
+			
+			
 			for(int i = 0 ; i < numberOfThreads ; i++){
-				reduceWorkers[i] = new ReduceWorker(reducePool);
+				reduceWorkers[i] = new ReduceWorker(reducePool,outputFilePath,reduceResultCallback);
 			}
 			
 			for(int i = 0 ; i < numberOfThreads ; i++){
@@ -145,6 +167,15 @@ public class Main  {
 				reduceWorkers[i].join();
 			}
 			
+
+			
+			Arrays.sort(reduceResults,Collections.reverseOrder());
+			for(int i = 0 ; i < reduceResults.length ; i++){
+				System.out.println(reduceResults[i].master.filename + " " + reduceResults[i].rank);
+			}
+			
+			writeInFile(outputFilePath, reduceResults);
+			
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -154,7 +185,30 @@ public class Main  {
 		}
 	}	
 	
-	
+	private static void writeInFile(String filename, ReduceResult[] results){
+		if(results == null)
+			return;
+		try
+		{
+			for(int i = 0; i < results.length ; i++){
+				ReduceResult aux = results[i];
+			    FileWriter fw = new FileWriter(filename,true); //the true will append the new data
+			    fw.write(aux.master.filename +";"
+			    + (float)aux.rank/100
+			    +";["
+			    +aux.master.maxLength
+			    +","
+			    +aux.master.maxWords.size()+
+			    "]"
+			    + System.getProperty("line.separator"));
+			    fw.close();
+			}
+		}
+		catch(IOException ioe)
+		{
+		    System.err.println("IOException: " + ioe.getMessage());
+		} 
+	}
 		
 	private static class Document{
 		

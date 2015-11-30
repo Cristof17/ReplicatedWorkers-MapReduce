@@ -10,7 +10,7 @@ import javax.print.attribute.standard.Chromaticity;
 
 import com.cristof.MapReduce.WorkPool;
 
-public class MapWorker extends Thread implements ProcessWordInterface{
+public class MapWorker extends Thread{
 	
 	public WorkPool wp;
 	public int maxSize;
@@ -35,16 +35,17 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 //		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
 		PartialText ps ;
 		while (true) {
+			System.out.println(this.getName()  +  " " +wp.ready + " access" );
 			ps = wp.getWork();
 			if (ps == null){
 				boolean ready = wp.ready;
 				break;
 			}
 			
-			System.out.println("Executing file " + ps.fileName + " from " + ps.start + " to " + ps.stop);
+//			System.out.println("Executing file " + ps.fileName + " from " + ps.start + " to " + ps.stop);
 			processPartialText(ps);
 //			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
-			
+			System.out.println(this.getName()  +  " " +wp.ready + " executat" );
 			this.maxSize = 0;
 			this.result = null;
 		}
@@ -72,11 +73,11 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 				else
 					raf.seek(ps.start);
 				
-				System.out.println("FILE = " + ps.fileName);
+//				System.out.println("FILE = " + ps.fileName);
 				
 				//TODO
 				if(ps.fileName.equals("/home/cristof/Downloads/Tema2APD/Test-Debug/doc3.txt")){
-					printRaf(raf, ps.start, ps.stop);
+//					printRaf(raf, ps.start, ps.stop);
 				}
 				
 				/*
@@ -137,22 +138,21 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 					}
 					
 									
-					if(word.toString().length() != 0){
-						System.out.print(word.toString());
-						System.out.println();
-					}
+//					if(word.toString().length() != 0){
+//						System.out.print(word.toString());
+//						System.out.println();
+//					}
 					
-					processWord(word.toString(),ps.fileName); //local Method
+					processWord(word.toString(),ps.fileName, ps.fragmentID); //local Method
 					word = new StringBuilder();
 				}
 			} catch (IOException e){}
 			callback.mapResultReady(result, this.ID, ps.fragmentID);
 		 }
 	
-	@Override
-	public synchronized void processWord(String word, String filename) {
+	public synchronized void processWord(String word, String filename,int fragmentID) {
 		if(result == null)
-			result = new MapResult(filename);
+			result = new MapResult(filename, fragmentID);
 		
 		result.putWord(word); //local Method
 		result.numberOfWords = result.numberOfWords+1 ;
@@ -185,10 +185,12 @@ public class MapWorker extends Thread implements ProcessWordInterface{
 		public ArrayList<String> maxWords;
 		public int maxLength;
 		public int numberOfWords;
+		public int fragmentID;
 		
-		public MapResult(String filename){
+		public MapResult(String filename,int fragmentID){
 			this.filename = filename;
 			this.numberOfWords = 0;
+			this.fragmentID = fragmentID;
 		}
 		
 		//count the word to the hash and check if it is of size maxSize
