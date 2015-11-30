@@ -116,6 +116,7 @@ public class Main  {
 			//open the documents and split the work
 			while(sc.hasNext()){
 				String fileName = sc.next();
+				inputFiles = new ArrayList<String>();
 				inputFiles.add(fileName);
 				Document firstDocument = new Document(fileName);
 				
@@ -173,11 +174,12 @@ public class Main  {
 
 			
 			Arrays.sort(reduceResults,Collections.reverseOrder());
+						
+			reduceResults = checkOrder(reduceResults, inputFiles);
+			
 			for(int i = 0 ; i < reduceResults.length ; i++){
 				System.out.println(reduceResults[i].master.filename + " " + reduceResults[i].rank);
 			}
-			
-			reduceResults = checkOrder(reduceResults, inputFiles);
 			
 			writeInFile(outputFilePath, reduceResults);
 			
@@ -189,6 +191,7 @@ public class Main  {
 			e.printStackTrace();
 		}
 	}	
+	
 	
 	private static ReduceResult[] checkOrder(ReduceResult[] original , ArrayList<String> input){
 		
