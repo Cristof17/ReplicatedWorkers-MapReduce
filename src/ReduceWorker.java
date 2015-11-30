@@ -32,7 +32,6 @@ public class ReduceWorker extends Thread{
 				break;
 			MapResult master = combine(task.mapResults);
 			float rank = process(master);
-//			System.out.println("Rank from " + master.filename + " = " + rank);
 			//to get the last two digits after the coma from rank, I
 			//multiply it by 100
 			ReduceResult result = new ReduceResult(master,(int) ( rank * 100));
@@ -42,8 +41,6 @@ public class ReduceWorker extends Thread{
 	
 	
 	public float process(MapResult mapResult){
-
-//		System.out.println("Processing " + mapResult.filename + " " + mapResult.maxLength);;
 		
 		float rank = 0;
 		//find which is the last key to iteratate to 
@@ -82,6 +79,8 @@ public class ReduceWorker extends Thread{
 		//Combine Hashes
 		for(int i = 1 ; i < maps.size() ; i++){
 			MapResult aux = maps.get(i);
+			if(aux == null)
+				continue;
 			//I need to know the last key from aux to bring everything from valid keys in master
 			//List contained up to lastKey in the master (to do an iteration)
 			Set<Integer> keySet = aux.hash.keySet();

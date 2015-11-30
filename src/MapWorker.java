@@ -30,20 +30,15 @@ public class MapWorker extends Thread{
 	
 	public void run() {
 		
-//		System.out.println("Thread-ul worker " + this.getName() + " a pornit...");
 		PartialText ps ;
 		while (true) {
-//			System.out.println(this.getName()  +  " " +wp.ready + " access" );
 			ps = wp.getWork();
 			if (ps == null){
 				boolean ready = wp.ready;
 				break;
 			}
 			
-//			System.out.println("Executing file " + ps.fileName + " from " + ps.start + " to " + ps.stop);
 			processPartialText(ps);
-//			System.out.println("Thread-ul worker " + this.getName() + " a executat partea de la " + ps.start + "-" + ps.stop);
-//			System.out.println(this.getName()  +  " " +wp.ready + " executat" );
 			this.maxSize = 0;
 			this.result = null;
 		}
@@ -70,14 +65,7 @@ public class MapWorker extends Thread{
 					raf.seek(ps.start);
 				else
 					raf.seek(ps.start);
-				
-//				System.out.println("FILE = " + ps.fileName);
-				
-				//TODO
-				if(ps.fileName.equals("/home/cristof/Downloads/Tema2APD/Test-Debug/doc3.txt")){
-//					printRaf(raf, ps.start, ps.stop);
-				}
-				
+			
 				/*
 				 * BEGINING
 				 */
@@ -93,7 +81,6 @@ public class MapWorker extends Thread{
 						//if half of the word, delete it
 						if(delimitators.contains(new Character((char)caracter).toString())){
 							raf.seek(ps.start);
-//							caracter = raf.readByte();
 						}else{
 							//it's not ok (middle of the word)
 							while(!delimitators.contains(new Character((char)caracter).toString())){
@@ -135,15 +122,12 @@ public class MapWorker extends Thread{
 						}
 					}
 					
-									
-//					if(word.toString().length() != 0){
-//						System.out.print(word.toString());
-//						System.out.println();
-//					}
-					
 					processWord(word.toString(),ps.fileName, ps.fragmentID); //local Method
 					word = new StringBuilder();
 				}
+				
+				raf.close();
+				
 			} catch (IOException e){}
 			callback.mapResultReady(result, this.ID, ps.fragmentID);
 		 }
@@ -156,28 +140,4 @@ public class MapWorker extends Thread{
 		result.numberOfWords = result.numberOfWords+1 ;
 		
 	}
-	
-		//TODO
-		public void printRaf(RandomAccessFile raf , long start , long stop){
-
-			try {
-				long prevPos = raf.getFilePointer();
-				raf.seek(start);
-				while(raf.getFilePointer() <= stop){
-					System.out.print((char)raf.readByte());
-				}
-				
-				
-				raf.seek(prevPos);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		}
-	
-//	public static class MapResult{
-//		
-//		
-//	}
-}
+	}

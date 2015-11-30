@@ -43,8 +43,6 @@ public class MapResult {
 		}else if(word.length() == maxLength){
 			maxWords.add(word);
 		}
-		
-//		System.out.println("Word size for " + word.toString() + " is " + word.toString().length());
 	}
 	
 }

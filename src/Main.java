@@ -47,10 +47,7 @@ public class Main  {
 		
 		/*
 		 * Read from file the fragmentSize and number of Files + filenames and sizes
-		 */
-		
-		
-		
+		*/
 		File inFile = new File(inputFilePath);
 		try {
 			
@@ -71,14 +68,16 @@ public class Main  {
 					//Put in a hasTable the results
 					synchronized (mapResults) {
 						
-						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
-						if(resultsForID == null){
-							ArrayList<MapResult> value = new ArrayList<MapResult>();
-							value.add(result);
-							mapResults.put(fragmentID, value);
-						}else{
-							resultsForID.add(result);
-							mapResults.put(fragmentID, resultsForID);
+						if(result != null){
+							ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
+							if(resultsForID == null){
+								ArrayList<MapResult> value = new ArrayList<MapResult>();
+								value.add(result);
+								mapResults.put(fragmentID, value);
+							}else{
+								resultsForID.add(result);
+								mapResults.put(fragmentID, resultsForID);
+							}
 						}
 					}
 				}
@@ -244,12 +243,6 @@ public class Main  {
 		
 		public ArrayList<PartialText> splitFile(int fragmentSize , int IDtoHave){ 
 			
-			/*
-			 * DELETE THIS WHEN COMPLETED DEBUGGING
-			 */
-//			String folderPath = "/home/cristof/Downloads/Tema2APD/Test-Debug/";
-//			name = folderPath + name;
-			
 			File file = new File(name);
 			long fileSize = file.length();
 			/*
@@ -268,7 +261,6 @@ public class Main  {
 			
 			PartialText lastFragment = new PartialText(name , lastPosition , fileSize - 1, IDtoHave);
 			fragments.add(lastFragment);
-			
 			
 			return fragments;
 			
