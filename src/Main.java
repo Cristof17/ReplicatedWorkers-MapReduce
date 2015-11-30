@@ -11,17 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
-import com.cristof.MapReduce.WorkPool;
-import com.cristof.MapReduce.Map.MapResultFinishedCallback;
-import com.cristof.MapReduce.Map.MapWorker;
-import com.cristof.MapReduce.Map.MapWorker.MapResult;
-import com.cristof.MapReduce.Map.PartialText;
-import com.cristof.MapReduce.Reduce.ReducePool;
-import com.cristof.MapReduce.Reduce.ReduceResult;
-import com.cristof.MapReduce.Reduce.ReduceResultFinishedCallback;
-import com.cristof.MapReduce.Reduce.ReduceTask;
-import com.cristof.MapReduce.Reduce.ReduceWorker;
-
 public class Main  {
 
 	static int documentID;
@@ -84,7 +73,7 @@ public class Main  {
 						
 						ArrayList<MapResult> resultsForID = (ArrayList<MapResult>)mapResults.get(fragmentID);
 						if(resultsForID == null){
-							ArrayList<MapResult> value = new ArrayList<MapWorker.MapResult>();
+							ArrayList<MapResult> value = new ArrayList<MapResult>();
 							value.add(result);
 							mapResults.put(fragmentID, value);
 						}else{
