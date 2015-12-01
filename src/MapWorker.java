@@ -103,9 +103,6 @@ public class MapWorker extends Thread{
 					//read a word
 					while(true){
 						++charRead;
-						if(ps.fileName.equals("1mb-4") && ps.start == 0){
-							System.out.println();
-						}
 						caracter =raf.readByte();
 						debugChar = (char)caracter;
 						
@@ -143,9 +140,6 @@ public class MapWorker extends Thread{
 						}
 					}
 
-					if(wordWithRepeat.toString().length() >= 17){
-						System.out.println(wordWithRepeat.toString());
-					}
 					processWord(wordWithRepeat.toString(),ps.fileName, ps.fragmentID); //local Method
 					word = new StringBuilder();
 					wordWithRepeat = new StringBuilder();

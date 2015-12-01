@@ -53,10 +53,7 @@ public class Main  {
 			
 			Scanner sc = new Scanner(inFile);
 			int fragmentSize = sc.nextInt();
-			System.out.println("Fragment size is " + fragmentSize);
-			
 			final int numberOfDocuments = sc.nextInt();
-			System.out.println("Number of documents is "+ numberOfDocuments);
 			
 			
 			//this object is responsible with adding the 
@@ -114,6 +111,8 @@ public class Main  {
 				
 			}
 			
+			long start = System.nanoTime();
+			
 			for(int i = 0 ; i < numberOfThreads ; i++){
 				mapWorkers[i].start();
 			}
@@ -154,16 +153,14 @@ public class Main  {
 				reduceWorkers[i].join();
 			}
 			
-
+			long finalTime = System.nanoTime() - start;
+			
+			System.out.println("Executed in " + (float)finalTime/1000000000 + " seconds");
 			
 			Arrays.sort(reduceResults,Collections.reverseOrder());
 						
 			reduceResults = checkOrder(reduceResults, inputFiles);
-			
-			for(int i = 0 ; i < reduceResults.length ; i++){
-				System.out.println(reduceResults[i].master.filename + " " + reduceResults[i].rank);
-			}
-			
+						
 			writeInFile(outputFilePath, reduceResults);
 			
 		} catch (FileNotFoundException e) {
