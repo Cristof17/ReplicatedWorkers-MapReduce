@@ -103,8 +103,12 @@ public class MapWorker extends Thread{
 					//read a word
 					while(true){
 						++charRead;
+						if(ps.fileName.equals("1mb-4") && ps.start == 0){
+							System.out.println();
+						}
 						caracter =raf.readByte();
 						debugChar = (char)caracter;
+						
 						if(delimitators.contains(new Character((char)caracter).toString())){
 							/*
 							 * If the charRead == numberOfChars after processing this word
@@ -117,16 +121,21 @@ public class MapWorker extends Thread{
 							 * because my algorithm checks to see if the previous character
 							 * is a delimiter
 							 */
+							
 							if(charRead == numberOfChars)
 								++charRead;
 							byte[] word_buffer = new byte[wordSize];
-							raf.seek(originalPosition + 1);
+							if(originalPosition == 0){
+								raf.seek(originalPosition);
+							}else
+								raf.seek(originalPosition);
 							raf.read(word_buffer,0,wordSize);
 							if(wordSize >0){
 								String word_string = new String(word_buffer,0,wordSize);
 								wordWithRepeat.append(word_string);
 								wordSize = 0;
 							}
+							caracter = raf.readByte();//delimiter and move one more char
 							break;
 						}else{
 							word.append((char)caracter);
@@ -134,7 +143,9 @@ public class MapWorker extends Thread{
 						}
 					}
 
-
+					if(wordWithRepeat.toString().length() >= 17){
+						System.out.println(wordWithRepeat.toString());
+					}
 					processWord(wordWithRepeat.toString(),ps.fileName, ps.fragmentID); //local Method
 					word = new StringBuilder();
 					wordWithRepeat = new StringBuilder();
