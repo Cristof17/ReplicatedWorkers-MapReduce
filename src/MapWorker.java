@@ -60,6 +60,7 @@ public class MapWorker extends Thread{
 				RandomAccessFile raf = new  RandomAccessFile(new File(ps.fileName),"r");
 				int charRead = 0;
 				StringBuilder word = new StringBuilder();
+				StringBuilder wordWithRepeat = new StringBuilder();
 				//for checking the letter before the first letter
 				if(ps.start == 0)
 					raf.seek(ps.start);
@@ -95,12 +96,14 @@ public class MapWorker extends Thread{
 				}
 				
 				//read the fragment
+				int wordSize = 0;
 				while(charRead <= numberOfChars){
 
+					long originalPosition = raf.getFilePointer();
 					//read a word
 					while(true){
 						++charRead;
-						caracter = raf.readByte();
+						caracter =raf.readByte();
 						debugChar = (char)caracter;
 						if(delimitators.contains(new Character((char)caracter).toString())){
 							/*
@@ -116,14 +119,25 @@ public class MapWorker extends Thread{
 							 */
 							if(charRead == numberOfChars)
 								++charRead;
+							byte[] word_buffer = new byte[wordSize];
+							raf.seek(originalPosition + 1);
+							raf.read(word_buffer,0,wordSize);
+							if(wordSize >0){
+								String word_string = new String(word_buffer,0,wordSize);
+								wordWithRepeat.append(word_string);
+								wordSize = 0;
+							}
 							break;
 						}else{
 							word.append((char)caracter);
+							wordSize ++;
 						}
 					}
-					
-					processWord(word.toString(),ps.fileName, ps.fragmentID); //local Method
+
+
+					processWord(wordWithRepeat.toString(),ps.fileName, ps.fragmentID); //local Method
 					word = new StringBuilder();
+					wordWithRepeat = new StringBuilder();
 				}
 				
 				raf.close();
@@ -135,9 +149,7 @@ public class MapWorker extends Thread{
 	public synchronized void processWord(String word, String filename,int fragmentID) {
 		if(result == null)
 			result = new MapResult(filename, fragmentID);
-		
-		result.putWord(word); //local Method
-		result.numberOfWords = result.numberOfWords+1 ;
-		
+			result.putWord(word); //local Method
+			result.numberOfWords = result.numberOfWords+1 ;
 	}
 	}
