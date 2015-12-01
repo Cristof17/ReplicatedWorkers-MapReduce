@@ -59,7 +59,7 @@ public class ReduceWorker extends Thread{
 			Integer numberOfWords = mapResult.numberOfWords;
 			//because my programs takes into account words of size 0
 			//I need to substract them (values.get(0)
-			numberOfWords -= values.get(0);
+			//numberOfWords -= values.get(0);
 			rank += ( Fibonacci(key + 1) * value )/(float)numberOfWords;
 		}
 		

@@ -119,9 +119,9 @@ public class Main  {
 			}
 
 			
-			for(int i = 0 ; i < numberOfThreads ; i++){
-				mapWorkers[i].join();
-			}
+//			for(int i = 0 ; i < numberOfThreads ; i++){
+//				mapWorkers[i].join();
+//			}
 			
 			for(int i = 0 ; i < numberOfDocuments ; i++){
 				ArrayList<MapResult> results =(ArrayList<MapResult>) mapResults.get(i);
